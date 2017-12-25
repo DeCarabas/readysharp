@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/ReadySharp/ReadySharp.csproj"
+                "${workspaceFolder}/examples/examples.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

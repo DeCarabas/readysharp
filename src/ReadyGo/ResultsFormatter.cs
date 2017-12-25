@@ -8,33 +8,36 @@ namespace ReadyGo {
     const int LeftMargin = 12;
     const int BarWidth = LineLength - LeftMargin - 2;
 
-    static string FormatTime(TimeSpan time) {
-      if (time < TimeSpan.FromMilliseconds(1)) {
+    static string FormatTime(double ms) {
+      if (ms < 0.001) {
+        double totalNanoseconds = ms * 100000;
+        return string.Format("{0:F2} ns", totalNanoseconds);
+      }
+      if (ms < 1) {
         // Measure in microseconds.
-        double totalMicroseconds = (double)time.Ticks / 10.0;
+        double totalMicroseconds = ms * 1000;
         return string.Format("{0:F2} us", totalMicroseconds);
       }
-      if (time < TimeSpan.FromSeconds(5)) {
-        double totalMilliseconds = Math.Round(time.TotalMilliseconds, 2);
-        return string.Format("{0:F2} ms", totalMilliseconds);
+      if (ms < 5000) {
+        return string.Format("{0:F2} ms", ms);
       }
-      if (time < TimeSpan.FromMinutes(5)) {
-        double totalSeconds = Math.Round(time.TotalSeconds, 2);
+      if (ms < 1000 * 60 * 5) {
+        double totalSeconds = ms / 1000.0;
         return string.Format("{0:F2} s", totalSeconds);
       }
-      double totalMinutes = Math.Round(time.TotalMinutes, 2);
+      double totalMinutes = ms / (1000.0 * 60.0);
       return string.Format("{0:F2} min", totalMinutes);
     }
 
     static string FormatLine(
       string label,
-      TimeSpan min,
-      TimeSpan p80,
-      TimeSpan max
+      double min,
+      double p80,
+      double max
     ) {
-      double ticksPerChar = (double)max.Ticks / (double)BarWidth;
-      int minPos = (int)Math.Round((double)min.Ticks / ticksPerChar);
-      int p80Pos = (int)Math.Round((double)p80.Ticks / ticksPerChar);
+      double msPerChar = (double)max / (double)BarWidth;
+      int minPos = (int)Math.Round((double)min / msPerChar);
+      int p80Pos = (int)Math.Round((double)p80 / msPerChar);
 
       var builder = new StringBuilder();
       builder.Append("  ");
@@ -57,12 +60,13 @@ namespace ReadyGo {
       }
       while (cursor < BarWidth) {
         builder.Append(' ');
+        cursor++;
       }
       builder.Append('|');
       return builder.ToString();
     }
 
-    static string FormatLegend(TimeSpan max) {
+    static string FormatLegend(double max) {
       string maxTime = FormatTime(max);
 
       var builder = new StringBuilder();
@@ -76,7 +80,7 @@ namespace ReadyGo {
     public static string[] FormatResults(
       BenchmarkResult current,
       BenchmarkResult baseline) {
-      TimeSpan max = current.P80;
+      double max = current.P80;
       if (baseline != null && baseline.P80 > max) {
         max = baseline.P80;
       }

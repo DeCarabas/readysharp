@@ -1,15 +1,17 @@
 namespace ReadyGo {
   using System.Runtime.CompilerServices;
-  
+
   public abstract class Benchmark {
     public abstract string Name {
       get;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public abstract void Setup();
+    public virtual void Setup() {
+    }
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public abstract void Cleanup();
+    public virtual void Cleanup() {
+    }
     [MethodImpl(MethodImplOptions.NoInlining)]
     public abstract void Go();
   }

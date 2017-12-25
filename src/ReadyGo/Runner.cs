@@ -19,7 +19,7 @@ namespace ReadyGo {
 
   public class Runner {
     const int OuterIterations = 16;
-    static readonly TimeSpan MinimumTime = TimeSpan.FromMilliseconds(3);
+    static readonly double MinimumTimeMs = 10;
     static readonly Benchmark NullBenchmark = new NullBenchmark();
     readonly Benchmark[] benchmarks;
 
@@ -27,7 +27,7 @@ namespace ReadyGo {
       this.benchmarks = benchmark;
     }
 
-    static TimeSpan MeasureRuntime(int iterations, Benchmark benchmark) {
+    static double MeasureRuntime(int iterations, Benchmark benchmark) {
       var sw = new Stopwatch();
 
       GC.Collect();
@@ -36,12 +36,16 @@ namespace ReadyGo {
         benchmark.Go();
       }
       sw.Stop();
-      return sw.Elapsed;
+      return (double)sw.ElapsedMilliseconds;
     }
 
-    static TimeSpan RunBenchmark(Benchmark benchmark, int iterations) {
-      TimeSpan rawTime = MeasureRuntime(iterations, benchmark);
-      TimeSpan constantTime = MeasureRuntime(iterations, NullBenchmark);
+    // Run the given benchmark but be sure to null out any overhead, so that
+    // we're only measuring the method contents. This returns a `double` instead
+    // of a TimeSpan because, strangely enough, TimeSpan doesn't have enough 
+    // resolution.
+    static double RunBenchmark(Benchmark benchmark, int iterations) {
+      double rawTime = MeasureRuntime(iterations, benchmark);
+      double constantTime = MeasureRuntime(iterations, NullBenchmark);
 
       return rawTime - constantTime;
     }
@@ -52,25 +56,26 @@ namespace ReadyGo {
       benchmark.Cleanup();
     }
 
-    static TimeSpan CaptureTime(
+    // This returns the time in ms.
+    static double CaptureTime(
       Benchmark benchmark,
       int iterations,
       bool throwOnTooFast = false) {
       benchmark.Setup();
-      TimeSpan result = RunBenchmark(benchmark, iterations);
+      double result = RunBenchmark(benchmark, iterations);
       benchmark.Cleanup();
 
       if (throwOnTooFast) {
-        if (result < MinimumTime) {
+        if (result < MinimumTimeMs) {
           throw new BenchmarkTooFastException();
         }
       }
 
-      return TimeSpan.FromMilliseconds(result.TotalMilliseconds / iterations);
+      return result / iterations;
     }
 
-    static TimeSpan Percentile(TimeSpan[] times, int percentile) {
-      TimeSpan[] sortedTimes = new TimeSpan[times.Length];
+    static double Percentile(double[] times, int percentile) {
+      double[] sortedTimes = new double[times.Length];
       Array.Copy(times, sortedTimes, times.Length);
       Array.Sort(sortedTimes);
 
@@ -79,15 +84,14 @@ namespace ReadyGo {
       int k = (int)(Math.Floor(h) - 1.0);
       double f = h % 1.0;
 
-      return TimeSpan.FromMilliseconds(sortedTimes[k].TotalMilliseconds +
-          (f * (sortedTimes[k + 1].TotalMilliseconds - sortedTimes[k].TotalMilliseconds)));
+      return sortedTimes[k] + (f * (sortedTimes[k + 1] - sortedTimes[k]));
     }
 
     public BenchmarkResult[] Run() {
       int[] iterations = new int[this.benchmarks.Length];
-      TimeSpan[][] benchTimes = new TimeSpan[this.benchmarks.Length][];
+      double[][] benchTimes = new double[this.benchmarks.Length][];
       for (int i = 0; i < this.benchmarks.Length; i++) {
-        benchTimes[i] = new TimeSpan[OuterIterations];
+        benchTimes[i] = new double[OuterIterations];
       }
       for (int i = 0; i < this.benchmarks.Length; i++) {
         Prime(this.benchmarks[i]);
@@ -95,7 +99,7 @@ namespace ReadyGo {
 
       for (int i = 0; i < this.benchmarks.Length; i++) {
         Benchmark benchmark = this.benchmarks[i];
-        TimeSpan[] times = benchTimes[i];
+        double[] times = benchTimes[i];
 
         iterations[i] = 1;
         while (true) {
@@ -117,7 +121,7 @@ namespace ReadyGo {
       for (int i = 1; i < OuterIterations; i++) {
         for (int j = 0; j < this.benchmarks.Length; j++) {
           Benchmark benchmark = this.benchmarks[j];
-          TimeSpan[] times = benchTimes[j];
+          double[] times = benchTimes[j];
 
           times[i] = CaptureTime(benchmark, iterations[j]);
           Console.Write(".");
@@ -128,7 +132,7 @@ namespace ReadyGo {
       var results = new BenchmarkResult[this.benchmarks.Length];
       for (int i = 0; i < this.benchmarks.Length; i++) {
         Benchmark benchmark = this.benchmarks[i];
-        TimeSpan[] times = benchTimes[i];
+        double[] times = benchTimes[i];
         Array.Sort(times);
 
         results[i] = new BenchmarkResult(
