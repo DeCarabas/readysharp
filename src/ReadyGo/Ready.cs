@@ -64,13 +64,55 @@ Options are:
     public BenchmarkArgumentException(string message) : base(message) { }
   }
 
+  public class BenchmarkBuilder {
+    readonly string name;
+    Action setupAction = null;
+    Action cleanupAction = null;
+
+    public BenchmarkBuilder(string name) {
+      this.name = name;
+    }
+
+    public BenchmarkBuilder Setup(Action setupAction) {
+      if (this.setupAction != null) {
+        throw new InvalidOperationException();
+      }
+      this.setupAction = setupAction;
+      return this;
+    }
+
+    public BenchmarkBuilder Cleanup(Action cleanupAction) {
+      if (this.cleanupAction != null) {
+        throw new InvalidOperationException();
+      }
+      this.cleanupAction = cleanupAction;
+      return this;
+    }
+
+    public void Go(string[] args, Action goAction) =>
+      Ready.Go(args, new DelegateBenchmark(
+        name: this.name,
+        goAction: goAction,
+        setupAction: this.setupAction,
+        cleanupAction: this.cleanupAction
+      ));
+
+    public void Go(BenchmarkArguments args, Action goAction) =>
+      Ready.Go(args, new DelegateBenchmark(
+        name: this.name,
+        goAction: goAction,
+        setupAction: this.setupAction,
+        cleanupAction: this.cleanupAction
+      ));
+  }
+
   public static class Ready {
-    public static int Go(string[] args, params Benchmark[] benchmarks)
+    public static int Go(string[] args, params IBenchmark[] benchmarks)
       => Go(new BenchmarkArguments(args), benchmarks);
 
     public static int Go(
       BenchmarkArguments arguments,
-      params Benchmark[] benchmarks) {
+      params IBenchmark[] benchmarks) {
       if (arguments == null) {
         throw new ArgumentNullException(nameof(arguments));
       }
@@ -103,6 +145,10 @@ Options are:
         Console.WriteLine();
       }
       return 0;
+    }
+
+    public static BenchmarkBuilder To(string name) {
+      return new BenchmarkBuilder(name);
     }
   }
 }
