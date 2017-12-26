@@ -69,8 +69,16 @@ Options are:
   }
 
   public static class Ready {
-    public static int Go(string[] args, params IBenchmark[] benchmarks)
-      => Go(new BenchmarkArguments(args), benchmarks);
+    public static int Go(string[] args, params IBenchmark[] benchmarks) {
+      try {
+        var arguments = new BenchmarkArguments(args);
+        return Go(arguments, benchmarks);
+      } catch (BenchmarkArgumentException bae) {
+        Console.WriteLine(bae.Message);
+        Console.WriteLine(BenchmarkArguments.GetHelp());
+        return -1;
+      }
+    }
 
     public static int Go(
       BenchmarkArguments arguments,
@@ -93,6 +101,11 @@ Options are:
         Console.WriteLine(bae.Message);
         Console.WriteLine(BenchmarkArguments.GetHelp());
         return -1;
+      }
+
+      if (arguments.Help) {
+        Console.WriteLine(BenchmarkArguments.GetHelp());
+        return 0;
       }
 
       var baseline = arguments.Compare ? Baseline.Load() : new Baseline();
