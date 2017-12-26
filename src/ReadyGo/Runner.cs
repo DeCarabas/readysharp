@@ -19,7 +19,7 @@ namespace ReadyGo {
 
   public class Runner {
     const int OuterIterations = 16;
-    static readonly double MinimumTimeMs = 10;
+    static readonly double MinimumTimeMs = 3;
     static readonly IBenchmark NullBenchmark = new NullBenchmark();
     readonly IBenchmark[] benchmarks;
 
