@@ -88,7 +88,7 @@ namespace ReadyGo {
       var lines = new List<string>();
       lines.Add(current.Name);
       if (baseline != null) {
-        lines.Add(FormatLine("Baseline", current.MinimumTime, current.P80, max));
+        lines.Add(FormatLine("Baseline", baseline.MinimumTime, baseline.P80, max));
       }
       lines.Add(FormatLine("Current", current.MinimumTime, current.P80, max));
       lines.Add(FormatLegend(max));

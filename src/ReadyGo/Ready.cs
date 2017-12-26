@@ -1,6 +1,10 @@
 
 namespace ReadyGo {
   using System;
+  using System.Collections.Generic;
+  using System.IO;
+  using System.Text;
+  using Newtonsoft.Json;
 
   public class BenchmarkArguments {
     public BenchmarkArguments() {
@@ -91,15 +95,52 @@ Options are:
         return -1;
       }
 
+      var baseline = arguments.Compare ? Baseline.Load() : new Baseline();
+
       var results = new Runner(benchmarks).Run();
       for (int i = 0; i < results.Length; i++) {
-        string[] lines = ResultsFormatter.FormatResults(results[i], null);
+        BenchmarkResult baselineResult = baseline.TryGet(results[i].Name);
+        string[] lines = ResultsFormatter.FormatResults(
+          results[i], baselineResult);
         foreach (string line in lines) {
           Console.WriteLine(line);
         }
         Console.WriteLine();
       }
+
+      if (arguments.Record) {
+        baseline.Results.Clear();
+        baseline.Results.AddRange(results);
+        baseline.Save();
+      }
+
       return 0;
+    }
+
+    public class Baseline {
+      const string FileName = ".readysharp";
+
+      readonly List<BenchmarkResult> results = new List<BenchmarkResult>();
+
+      [JsonProperty("benchmark_results")]
+      public List<BenchmarkResult> Results => this.results;
+
+      public static Baseline Load() {
+        if (File.Exists(FileName)) {
+          string text = File.ReadAllText(FileName, Encoding.UTF8);
+          return JsonConvert.DeserializeObject<Baseline>(text);
+        } else {
+          return new Baseline();
+        }
+      }
+
+      public void Save() {
+        string text = JsonConvert.SerializeObject(this);
+        File.WriteAllText(FileName, text, Encoding.UTF8);
+      }
+
+      public BenchmarkResult TryGet(string name) => this.results.Find(
+          r => String.Equals(r.Name, name, StringComparison.OrdinalIgnoreCase));
     }
   }
 }
