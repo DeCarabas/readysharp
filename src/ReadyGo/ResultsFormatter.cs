@@ -21,12 +21,9 @@ namespace ReadyGo {
       if (ms < 5000) {
         return string.Format("{0:F2} ms", ms);
       }
-      if (ms < 1000 * 60 * 5) {
-        double totalSeconds = ms / 1000.0;
-        return string.Format("{0:F2} s", totalSeconds);
-      }
-      double totalMinutes = ms / (1000.0 * 60.0);
-      return string.Format("{0:F2} min", totalMinutes);
+
+      double totalSeconds = ms / 1000.0;
+      return string.Format("{0:F2} s", totalSeconds);
     }
 
     static string FormatLine(
