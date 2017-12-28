@@ -1,7 +1,5 @@
 namespace ReadyGo
 {
-    using System;
-
     public class BenchmarkResult
     {
         public BenchmarkResult(string name, double minimumTime, double p80)

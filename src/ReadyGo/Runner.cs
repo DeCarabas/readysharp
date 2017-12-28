@@ -1,9 +1,9 @@
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
 namespace ReadyGo
 {
-    using System;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-
     sealed class NullBenchmark : BenchmarkBase
     {
         public override string Name => "(null)";
@@ -38,7 +38,7 @@ namespace ReadyGo
         {
             var sw = new Stopwatch();
 
-            GC.Collect();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
             sw.Start();
             for (int i = 0; i < iterations; i++)
             {

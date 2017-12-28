@@ -1,16 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 namespace ReadyGo
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     static class ResultsFormatter
     {
         const int LineLength = 80;
-        const int LeftMargin = 12;
-        const int BarWidth = LineLength - LeftMargin - 2;
+        internal const int LeftMargin = 12;
 
-        static string FormatTime(double ms)
+        internal static string FormatTime(double ms)
         {
             if (ms < 0.001)
             {
@@ -32,25 +31,18 @@ namespace ReadyGo
             return string.Format("{0:F2} s", totalSeconds);
         }
 
-        static string FormatLine(
-          string label,
-          double min,
-          double p80,
-          double max
-        )
+        internal static void FormatBar(
+            StringBuilder builder,
+            double min,
+            double p80,
+            double max,
+            int len)
         {
-            double msPerChar = (double)max / (double)BarWidth;
+            // Mapping [0, max] to [0, len-1]
+            double msPerChar = (double)max / (double)(len - 1);
             int minPos = (int)Math.Round((double)min / msPerChar);
             int p80Pos = (int)Math.Round((double)p80 / msPerChar);
 
-            var builder = new StringBuilder();
-            builder.Append("  ");
-            builder.Append(label);
-            builder.Append(": ");
-            if (builder.Length < LeftMargin)
-            {
-                builder.Append(' ', LeftMargin - builder.Length);
-            }
             builder.Append('|');
             int cursor = 0;
             while (cursor < minPos)
@@ -60,17 +52,43 @@ namespace ReadyGo
             }
             builder.Append('x');
             cursor++;
-            while (cursor < p80Pos)
+            if (cursor < p80Pos)
             {
                 builder.Append('-');
                 cursor++;
+                while (cursor <= p80Pos)
+                {
+                    builder.Append('-');
+                    cursor++;
+                }
             }
-            while (cursor < BarWidth)
+            while (cursor < len)
             {
                 builder.Append(' ');
                 cursor++;
             }
             builder.Append('|');
+        }
+
+        internal static string FormatLine(
+          string label,
+          double min,
+          double p80,
+          double max,
+          int len = LineLength
+        )
+        {
+            int barWidth = len - LeftMargin - 2;
+
+            var builder = new StringBuilder();
+            builder.Append("  ");
+            builder.Append(label);
+            builder.Append(": ");
+            if (builder.Length < LeftMargin)
+            {
+                builder.Append(' ', LeftMargin - builder.Length);
+            }
+            FormatBar(builder, min, p80, max, barWidth);
             return builder.ToString();
         }
 

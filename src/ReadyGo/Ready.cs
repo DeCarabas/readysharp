@@ -1,12 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace ReadyGo
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-    using Newtonsoft.Json;
-
     public class BenchmarkArguments
     {
         public BenchmarkArguments()

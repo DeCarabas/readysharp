@@ -1,8 +1,8 @@
+using System;
+using System.Runtime.CompilerServices;
+
 namespace ReadyGo
 {
-    using System;
-    using System.Runtime.CompilerServices;
-
     public interface IBenchmark
     {
         string Name
