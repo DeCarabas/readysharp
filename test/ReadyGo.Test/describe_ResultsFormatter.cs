@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using FluentAssertions;
 using NSpec;
 
@@ -98,6 +99,61 @@ namespace ReadyGo.Test
                     before = () => label = "";
                     it["is right"] = () => line.Should().Be("  :         |x  |");
                 };
+            };
+        }
+
+        void formatting_results()
+        {
+            it["raises ArgumentNull when the first arg is null"] = () =>
+            {
+                Action call = () => ResultsFormatter.FormatResults(null, null);
+                call.ShouldThrow<ArgumentNullException>()
+                    .And.ParamName.Should().Be("current");
+            };
+            context["without a baseline"] = () =>
+            {
+                var results = new BenchmarkResult("Foo", 1, 2);
+                string[] lines = ResultsFormatter.FormatResults(results, null);
+
+                it["has three lines"] = () => lines.Length.Should().Be(3);
+                it["has the name of the test"] = ()
+                    => lines[0].Should().Be("Foo");
+                it["has a results bar"] = ()
+                    => lines[1].Should().Match("*Current:*|*|");
+                it["has a time"] = ()
+                    => lines[2].Should().EndWith("2.00 ms");
+            };
+            context["when current is slower"] = () =>
+            {
+                var current = new BenchmarkResult("Foo", 2, 3);
+                var baseline = new BenchmarkResult("Foo", 1, 2);
+                string[] lines = ResultsFormatter.FormatResults(current, baseline);
+
+                it["has four lines"] = () => lines.Length.Should().Be(4);
+                it["has the name of the test"] = ()
+                    => lines[0].Should().Be("Foo");
+                it["has a baseline results bar that stops before end"] = ()
+                    => lines[1].Should().Match("*Baseline:*|* |");
+                it["has a current results bar that goes up to end"] = ()
+                    => lines[2].Should().Match("*Current:*|*-|");
+                it["has a time at max"] = ()
+                    => lines[3].Should().EndWith("3.00 ms");
+            };
+            context["when baseline is slower"] = () =>
+            {
+                var current = new BenchmarkResult("Foo", 1, 2);
+                var baseline = new BenchmarkResult("Foo", 2, 3);
+                string[] lines = ResultsFormatter.FormatResults(current, baseline);
+
+                it["has four lines"] = () => lines.Length.Should().Be(4);
+                it["has the name of the test"] = ()
+                    => lines[0].Should().Be("Foo");
+                it["has a baseline results bar that goes up to end"] = ()
+                    => lines[1].Should().Match("*Baseline:*|*-|");
+                it["has a current results bar that stops before end"] = ()
+                    => lines[2].Should().Match("*Current:*|* |");
+                it["has a time at max"] = ()
+                    => lines[3].Should().EndWith("3.00 ms");
             };
         }
     }

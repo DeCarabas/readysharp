@@ -108,6 +108,11 @@ namespace ReadyGo
           BenchmarkResult current,
           BenchmarkResult baseline)
         {
+            if (current == null)
+            {
+                throw new ArgumentNullException(nameof(current));
+            }
+
             double max = current.P80;
             if (baseline != null && baseline.P80 > max)
             {
