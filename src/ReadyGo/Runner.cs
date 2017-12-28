@@ -34,7 +34,7 @@ namespace ReadyGo
             this.benchmarks = benchmark;
         }
 
-        static double MeasureRuntime(int iterations, IBenchmark benchmark)
+        internal static double MeasureRuntime(int iterations, IBenchmark benchmark)
         {
             var sw = new Stopwatch();
 
@@ -104,6 +104,7 @@ namespace ReadyGo
 
         public BenchmarkResult[] Run()
         {
+            if (this.benchmarks == null) { return new BenchmarkResult[0]; }
             int[] iterations = new int[this.benchmarks.Length];
             double[][] benchTimes = new double[this.benchmarks.Length][];
             for (int i = 0; i < this.benchmarks.Length; i++)
