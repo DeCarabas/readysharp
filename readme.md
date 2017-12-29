@@ -15,7 +15,7 @@ For a benchmark taking about 1ms, a full run will take around half a second.
 * It records benchmark runtime, stores it in a file, and compares it to benchmark runs that you make after changing the code.
 Most benchmarking tools are designed for comparison of multiple alternatives in the same source tree, which usually requires more effort.
 
-It is a little different in the particulars, though:
+It is a little different in the details, though:
 
 * It requires that each benchmark be in a class, not in a set of blocks.
 
