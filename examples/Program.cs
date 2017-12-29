@@ -1,8 +1,16 @@
 ﻿using System;
+using System.IO;
 using ReadyGo;
 
 namespace examples
 {
+    class BigFiles : IBenchmark
+    {
+        public string Name => "big files";
+        public void Setup() => File.WriteAllText("foo", new String('X', 1000000));
+        public void Cleanup() => File.Delete("foo");
+        public void Go() => File.ReadAllText("foo");
+    }
 
     class StringFormatBenchmark : BenchmarkBase
     {
@@ -22,6 +30,7 @@ namespace examples
         {
             Ready.Go(
               args,
+              new BigFiles(),
               new StringFormatBenchmark(),
               new StringConcatBenchmark());
         }

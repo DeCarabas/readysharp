@@ -1,1 +1,1 @@
-﻿{"benchmark_results":[{"MinimumTime":0.000152587890625,"Name":"Formatting a string with class","P80":0.000152587890625},{"MinimumTime":2.288818359375E-05,"Name":"Concatenating strings","P80":2.288818359375E-05}]}
+﻿{"benchmark_results":[{"MinimumTime":2.0,"Name":"big files","P80":2.5},{"MinimumTime":0.0001220703125,"Name":"Formatting a string with class","P80":0.00018310546875},{"MinimumTime":2.288818359375E-05,"Name":"Concatenating strings","P80":3.0517578125E-05}]}
