@@ -28,34 +28,39 @@ namespace ReadyGo
         static readonly double MinimumTimeMs = 3;
         static readonly IBenchmark NullBenchmark = new NullBenchmark();
         readonly IBenchmark[] benchmarks;
+        readonly IBenchmarkTimer timer;
 
-        public Runner(IBenchmark[] benchmark)
+        public Runner(IBenchmark[] benchmark, IBenchmarkTimer timer = null)
         {
             this.benchmarks = benchmark;
+            this.timer = timer ?? new BenchmarkTimer();
         }
 
-        internal static double MeasureRuntime(int iterations, IBenchmark benchmark)
+        static double MeasureRuntime(
+            IBenchmark benchmark, int iterations, IBenchmarkTimer timer)
         {
-            var sw = new Stopwatch();
-
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
-            sw.Start();
+            timer.Restart();
             for (int i = 0; i < iterations; i++)
             {
                 benchmark.Go();
             }
-            sw.Stop();
-            return (double)sw.ElapsedMilliseconds;
+            timer.Stop();
+            return timer.ElapsedMilliseconds;
         }
 
         // Run the given benchmark but be sure to null out any overhead, so that
         // we're only measuring the method contents. This returns a `double` 
         // instead of a TimeSpan because, strangely enough, TimeSpan doesn't 
         // have enough resolution.
-        static double RunBenchmark(IBenchmark benchmark, int iterations)
+        static double RunBenchmark(
+            IBenchmark benchmark,
+            IBenchmark nullBenchmark,
+            int iterations,
+            IBenchmarkTimer timer)
         {
-            double rawTime = MeasureRuntime(iterations, benchmark);
-            double constantTime = MeasureRuntime(iterations, NullBenchmark);
+            double rawTime = MeasureRuntime(benchmark, iterations, timer);
+            double constantTime = MeasureRuntime(nullBenchmark, iterations, timer);
 
             return rawTime - constantTime;
         }
@@ -68,13 +73,19 @@ namespace ReadyGo
         }
 
         // This returns the time in ms.
-        static double CaptureTime(
-          IBenchmark benchmark,
-          int iterations,
-          bool throwOnTooFast = false)
+        internal static double CaptureTime(
+            IBenchmark benchmark,
+            IBenchmark nullBenchmark,
+            int iterations,
+            IBenchmarkTimer timer,
+            bool throwOnTooFast = false)
         {
             benchmark.Setup();
-            double result = RunBenchmark(benchmark, iterations);
+            double result = RunBenchmark(
+                benchmark,
+                nullBenchmark,
+                iterations,
+                timer);
             benchmark.Cleanup();
 
             if (throwOnTooFast)
@@ -128,7 +139,9 @@ namespace ReadyGo
                     {
                         times[0] = CaptureTime(
                           benchmark,
+                          NullBenchmark,
                           iterations[i],
+                          this.timer,
                           throwOnTooFast: true);
                         break;
                     }
@@ -149,7 +162,11 @@ namespace ReadyGo
                     IBenchmark benchmark = this.benchmarks[j];
                     double[] times = benchTimes[j];
 
-                    times[i] = CaptureTime(benchmark, iterations[j]);
+                    times[i] = CaptureTime(
+                        benchmark,
+                        NullBenchmark,
+                        iterations[j],
+                        this.timer);
                     Console.Write(".");
                 }
             }
@@ -170,7 +187,7 @@ namespace ReadyGo
             return results;
         }
 
-        class BenchmarkTooFastException : Exception
+        internal class BenchmarkTooFastException : Exception
         {
         }
     }
