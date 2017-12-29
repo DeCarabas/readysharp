@@ -4,6 +4,9 @@ using System.Text;
 
 namespace ReadyGo
 {
+    /// <summary>
+    /// Format benchmark results for display on a terminal.
+    /// </summary>
     static class ResultsFormatter
     {
         const int LineLength = 80;
@@ -104,6 +107,14 @@ namespace ReadyGo
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Format benchmark results for display on a terminal.
+        /// </summary>
+        /// <param name="current">The benchmark results just measured.</param>
+        /// <param name="baseline">The benchmark results to compare against.
+        /// </param>
+        /// <returns>An array of strings, one for each line of the report.
+        /// </returns>
         public static string[] FormatResults(
           BenchmarkResult current,
           BenchmarkResult baseline)

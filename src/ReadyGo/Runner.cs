@@ -22,24 +22,116 @@ namespace ReadyGo
         }
     }
 
+    /// <summary>
+    /// Provides more fine-grained control over running benchmarks.
+    /// </summary>
+    /// <remarks>
+    /// You probably don't want this; you probably want to just call
+    /// <see cref="Ready.Go"/>. Nevertheless, if you want your own control over
+    /// baselines or reporting results or something, then you can create one of 
+    /// these and call the <see cref="Runner.Run" /> method.
+    /// </remarks>
     public class Runner
     {
-        const int OuterIterations = 16;
-        static readonly double MinimumTimeMs = 3;
+        const int DefaultOuterIterations = 16;
+        const double DefaultMinimumTimeMs = 3;
         static readonly IBenchmark NullBenchmark = new NullBenchmark();
         readonly IBenchmark[] benchmarks;
-        readonly IBenchmarkTimer timer;
+        double minimumTimeMs;
+        int outerIterations;
+        IBenchmarkTimer timer;
 
-        public Runner(IBenchmark[] benchmark, IBenchmarkTimer timer = null)
+        /// <summary>
+        /// Create a new instance of the <see cref="Runner"/> class.
+        /// </summary>
+        /// <param name="benchmarks">The benchmarks we will be running.</param>
+        public Runner(IBenchmark[] benchmarks)
         {
-            this.benchmarks = benchmark;
-            this.timer = timer ?? new BenchmarkTimer();
+            this.benchmarks = benchmarks;
+            this.minimumTimeMs = DefaultMinimumTimeMs;
+            this.outerIterations = DefaultOuterIterations;
+            this.timer = new BenchmarkTimer();
+        }
+
+        /// <summary>
+        /// Gets or sets minimum amount of time to allow a 
+        /// <see cref="IBenchmark.Go" /> method to run.
+        /// </summary>
+        /// <returns>The minimum execution time, in milliseconds.</returns>
+        /// <remarks>
+        /// <para>The runner enforces a minimum execution time so that we can
+        /// ensure that we get a good reading off of the timer, and runs a given
+        /// benchmark's <see cref="IBenchmark.Go" /> method in a loop until the
+        /// minimum time has been reached.</para>
+        /// 
+        /// <para>The default value of this property is 3ms. Setting this value
+        /// higher increases the accuracy of the benchmark, but can make 
+        /// execution time slower. Setting this value lower will have the 
+        /// opposite effect.</para>
+        /// </remarks>
+        public double MinimumTimeMs
+        {
+            get => this.minimumTimeMs;
+            set
+            {
+                if (value <= double.Epsilon)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                this.minimumTimeMs = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of times to run each benchmark.
+        /// </summary>
+        /// <returns>The number of times to run each benchmark.</returns>
+        /// <remarks>
+        /// <para>This property controls the number of times each benchmark 
+        /// is run overall. (The <see cref="IBenchmark.Go" /> method may still
+        /// be called more times, in order to meet the minimum runtime 
+        /// requirements, but this property controls the number of times each
+        /// benchmark is measured.)</para>
+        /// 
+        /// <para>The default value for this property is 16.</para></remarks>
+        public int OuterIterations
+        {
+            get => this.outerIterations;
+            set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                this.outerIterations = value;
+            }
+        }
+
+        /// <summary>
+        /// Get or set the timer to use when running benchmarks.
+        /// </summary>
+        /// <returns>The <see cref="IBenchmarkTimer" /> instance that this 
+        /// runner will use.</returns>
+        /// <remarks>By default this is an instance of 
+        /// <see cref="BenchmarkTimer" />.</remarks>
+        public IBenchmarkTimer Timer
+        {
+            get => this.timer;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                this.timer = value;
+            }
         }
 
         static double MeasureRuntime(
             IBenchmark benchmark, int iterations, IBenchmarkTimer timer)
         {
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
+            GC.Collect(
+                GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
             timer.Restart();
             for (int i = 0; i < iterations; i++)
             {
@@ -49,10 +141,6 @@ namespace ReadyGo
             return timer.ElapsedMilliseconds;
         }
 
-        // Run the given benchmark but be sure to null out any overhead, so that
-        // we're only measuring the method contents. This returns a `double` 
-        // instead of a TimeSpan because, strangely enough, TimeSpan doesn't 
-        // have enough resolution.
         static double RunBenchmark(
             IBenchmark benchmark,
             IBenchmark nullBenchmark,
@@ -60,7 +148,8 @@ namespace ReadyGo
             IBenchmarkTimer timer)
         {
             double rawTime = MeasureRuntime(benchmark, iterations, timer);
-            double constantTime = MeasureRuntime(nullBenchmark, iterations, timer);
+            double constantTime = MeasureRuntime(
+                nullBenchmark, iterations, timer);
 
             return rawTime - constantTime;
         }
@@ -72,12 +161,10 @@ namespace ReadyGo
             benchmark.Cleanup();
         }
 
-        // This returns the time in ms.
-        internal static double CaptureTime(
+        internal double CaptureTime(
             IBenchmark benchmark,
             IBenchmark nullBenchmark,
             int iterations,
-            IBenchmarkTimer timer,
             bool throwOnTooFast = false)
         {
             benchmark.Setup();
@@ -85,7 +172,7 @@ namespace ReadyGo
                 benchmark,
                 nullBenchmark,
                 iterations,
-                timer);
+                this.timer);
             benchmark.Cleanup();
 
             if (throwOnTooFast)
@@ -113,6 +200,11 @@ namespace ReadyGo
             return sortedTimes[k] + (f * (sortedTimes[k + 1] - sortedTimes[k]));
         }
 
+        /// <summary>
+        /// Run the configured benchmarks.
+        /// </summary>
+        /// <returns>An array of <see cref="BenchmarkResult" /> objects, which
+        /// contain the statistics for the benchmarks.</returns>
         public BenchmarkResult[] Run()
         {
             if (this.benchmarks == null) { return new BenchmarkResult[0]; }
@@ -141,7 +233,6 @@ namespace ReadyGo
                           benchmark,
                           NullBenchmark,
                           iterations[i],
-                          this.timer,
                           throwOnTooFast: true);
                         break;
                     }
@@ -165,8 +256,7 @@ namespace ReadyGo
                     times[i] = CaptureTime(
                         benchmark,
                         NullBenchmark,
-                        iterations[j],
-                        this.timer);
+                        iterations[j]);
                     Console.Write(".");
                 }
             }

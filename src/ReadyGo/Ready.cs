@@ -6,20 +6,70 @@ using Newtonsoft.Json;
 
 namespace ReadyGo
 {
+    /// <summary>
+    /// Provides command-line configuation options to the benchmark runner.
+    /// </summary>
+    /// <remarks>
+    /// <para>This class is suitable for use when you have your own harness, or
+    /// your own command line parsing, or you need to tweak things just a little 
+    /// bit.</para>
+    /// <para>If you have your entirely own command line handling, just set the
+    /// properties on this object.</para>
+    /// <para>If you want to use the default handling but tweak the results a
+    /// bit, create one of these and pass the args to the constructor, or call
+    /// <see cref="ParseArgs" />.</para>
+    /// </remarks>
     public class BenchmarkArguments
     {
+        /// <summary>
+        /// Construct a new instance of the <see cref="BenchmarkArguments" /> 
+        /// class.
+        /// </summary>
         public BenchmarkArguments()
         {
         }
+
+        /// <summary>
+        /// Construct a new instance of the <see cref="BenchmarkArguments" />
+        /// class and set the properties by parsing the provided command line
+        /// arguments.
+        /// </summary>
+        /// <param name="args">The command line arguments to parse.</param>
         public BenchmarkArguments(string[] args)
         {
             ParseArgs(args);
         }
 
+        /// <summary>
+        /// Gets or sets whether or not the run should compare against the 
+        /// baseline.
+        /// </summary>
+        /// <returns><c>true</c> if the run should compare against the baseline, 
+        /// otherwise <c>false</c>.</returns>
+        /// <remarks>The default value is <c>false</c>.</remarks>
         public bool Compare { get; set; }
+        /// <summary>
+        /// Gets or sets whether or not the runner should show command line 
+        /// help.
+        /// </summary>
+        /// <returns><c>true</c> if the run should show help, otherwise 
+        /// <c>false</c>.</returns>
+        /// <remarks>The default value is <c>false</c>.</remarks>
         public bool Help { get; set; }
+        /// <summary>
+        /// Gets or sets whether or not the run should record its results in 
+        /// the baseline file.
+        /// </summary>
+        /// <returns><c>true</c> if the run should record results, otherwise 
+        /// <c>false</c>.</returns>
+        /// <remarks>The default value is <c>false</c>.</remarks>
         public bool Record { get; set; }
 
+        /// <summary>
+        /// Get the help string describing the valid command line arguments.
+        /// </summary>
+        /// <returns>The help string describing the valid command line 
+        /// arguments.</returns>
         public static string GetHelp()
         {
             return @"
@@ -30,6 +80,14 @@ Options are:
 ";
         }
 
+        /// <summary>
+        /// Set properties by parsing the provided commmand line arguments.
+        /// </summary>
+        /// <param name="args">The arguments to parse.</param>
+        /// <exception cref="BenchmarkArgumentException">The arguments are not
+        /// in the right format.</exception>
+        /// <remarks>See <see cref="GetHelp" /> for the format of the command
+        /// line arguments this method supports.</remarks>
         public void ParseArgs(string[] args)
         {
             if (args == null || args.Length == 0)
@@ -57,6 +115,11 @@ Options are:
             }
         }
 
+        /// <summary>
+        /// Ensure that the current set of properties is valid.
+        /// </summary>
+        /// <exception cref="BenchmarkArgumentException">The current set of
+        /// property values is invalid.</exception>
         public void Validate()
         {
             if (Record && Compare)
@@ -68,13 +131,36 @@ Options are:
         }
     }
 
+    /// <summary>
+    /// The exception raised when there is a problem with the arguments supplied
+    /// to the runner.
+    /// </summary>
+    /// <remarks>See <see cref="BenchmarkArguments" />for more information.
+    /// </remarks>
     public class BenchmarkArgumentException : Exception
     {
         public BenchmarkArgumentException(string message) : base(message) { }
     }
 
+    /// <summary>
+    /// The public entry point for running benchmarks.
+    /// </summary>
+    /// <remarks>This is the entry point for running benchmarks. Start with 
+    /// either of the <see cref="Go" /> methods.</remarks>
     public static class Ready
     {
+        /// <summary>
+        /// Run the specified benchmarks, and write the results to 
+        /// <see cref="Console.Out" />.
+        /// </summary>
+        /// <param name="args">The command line arguments to be parsed before 
+        /// running the benchmarks.</param>
+        /// <param name="benchmarks">The benchmarks to run.</param>
+        /// <returns><c>0</c> if the benchmarks all ran successfully, otherwise
+        /// a nonzero return code indicating failure.</returns>
+        /// <remarks>If the benchmarks succeed, the appropriate report will be
+        /// written out to <see cref="Console.Out" />. Otherwise, an appropriate
+        /// failure message will be written instead.</remarks>
         public static int Go(string[] args, params IBenchmark[] benchmarks)
         {
             try
@@ -90,6 +176,15 @@ Options are:
             }
         }
 
+        /// <summary>
+        /// Run the specified benchmarks, and write the results to 
+        /// <see cref="Console.Out" />.
+        /// </summary>
+        /// <param name="arguments">The parsed arguments to configure the 
+        /// benchmark run.</param>
+        /// <param name="benchmarks">The benchmarks to run.</param>
+        /// <returns><c>0</c> if the benchmarks all ran successfully, otherwise
+        /// a nonzero return code indicating failure.</returns>
         public static int Go(
           BenchmarkArguments arguments,
           params IBenchmark[] benchmarks)
@@ -150,7 +245,7 @@ Options are:
             return 0;
         }
 
-        public class Baseline
+        class Baseline
         {
             const string FileName = ".readysharp";
 

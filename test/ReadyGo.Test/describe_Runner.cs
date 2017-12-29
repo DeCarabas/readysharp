@@ -29,12 +29,12 @@ namespace ReadyGo.Test
         {
             double runtime = 0;
             int iterations = 1;
-            act = () => runtime = Runner.CaptureTime(
-                benchmark,
-                nullBenchmark,
-                iterations,
-                timer,
-                throwOnTooFast: true);
+            act = () =>
+            {
+                var runner = new Runner(null) { Timer = timer };
+                runtime = runner.CaptureTime(
+                    benchmark, nullBenchmark, iterations, throwOnTooFast: true);
+            };
             context["the benchmark is too fast"] = () =>
             {
                 before = () => { benchmark.ExpectedDuration = 1.0; };
