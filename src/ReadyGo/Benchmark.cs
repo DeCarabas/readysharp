@@ -32,7 +32,7 @@ namespace ReadyGo
     /// single pair of <see cref="Setup" /> and <see cref="Cleanup" /> methods.
     /// This is normally not a problem, since a fast <see cref="Go" /> method
     /// should not have so many side-effects that it needs <see cref="Setup" />
-    /// or <see cref="Cleanup" /> work done in-between.
+    /// or <see cref="Cleanup" /> work done in-between.</para>
     /// </remarks>
     public interface IBenchmark
     {

@@ -139,6 +139,12 @@ Options are:
     /// </remarks>
     public class BenchmarkArgumentException : Exception
     {
+        /// <summary>
+        /// Construct a new instance of the 
+        /// <see cref="BenchmarkArgumentException" /> class.
+        /// </summary>
+        /// <param name="message">The message explaining what went wrong.
+        /// </param>
         public BenchmarkArgumentException(string message) : base(message) { }
     }
 
@@ -146,7 +152,7 @@ Options are:
     /// The public entry point for running benchmarks.
     /// </summary>
     /// <remarks>This is the entry point for running benchmarks. Start with 
-    /// either of the <see cref="Go" /> methods.</remarks>
+    /// the <see cref="Ready.Go(string[], IBenchmark[])" /> methods.</remarks>
     public static class Ready
     {
         /// <summary>
@@ -158,9 +164,15 @@ Options are:
         /// <param name="benchmarks">The benchmarks to run.</param>
         /// <returns><c>0</c> if the benchmarks all ran successfully, otherwise
         /// a nonzero return code indicating failure.</returns>
-        /// <remarks>If the benchmarks succeed, the appropriate report will be
+        /// <remarks>
+        /// <para>If the benchmarks succeed, the appropriate report will be
         /// written out to <see cref="Console.Out" />. Otherwise, an appropriate
-        /// failure message will be written instead.</remarks>
+        /// failure message will be written instead.</para>
+        /// <para>If you need custom command line handling, create a new 
+        /// instance of the <see cref="BenchmarkArguments" /> class and call the
+        /// <see cref="Ready.Go(BenchmarkArguments, IBenchmark[])" /> overload.
+        /// </para>
+        /// </remarks>
         public static int Go(string[] args, params IBenchmark[] benchmarks)
         {
             try
@@ -185,6 +197,12 @@ Options are:
         /// <param name="benchmarks">The benchmarks to run.</param>
         /// <returns><c>0</c> if the benchmarks all ran successfully, otherwise
         /// a nonzero return code indicating failure.</returns>
+        /// <remarks>
+        /// <para>If the benchmarks succeed, the appropriate report will be
+        /// written out to <see cref="Console.Out" />. Otherwise, an appropriate
+        /// failure message will be written instead.</para>
+        /// </remarks>
+
         public static int Go(
           BenchmarkArguments arguments,
           params IBenchmark[] benchmarks)

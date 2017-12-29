@@ -27,9 +27,10 @@ namespace ReadyGo
     /// </summary>
     /// <remarks>
     /// You probably don't want this; you probably want to just call
-    /// <see cref="Ready.Go"/>. Nevertheless, if you want your own control over
-    /// baselines or reporting results or something, then you can create one of 
-    /// these and call the <see cref="Runner.Run" /> method.
+    /// <see cref="Ready.Go(string[], IBenchmark[])"/>. Nevertheless, if you 
+    /// want your own control over baselines or reporting results or something,
+    /// then you can create one of these and call the <see cref="Runner.Run" /> 
+    /// method.
     /// </remarks>
     public class Runner
     {
