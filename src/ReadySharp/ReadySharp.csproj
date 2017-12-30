@@ -4,8 +4,13 @@
     <OutputType>library</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>0.9.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>ReadyGo</PackageId><!-- Mistakes were made. -->
     <Title>ReadySharp</Title>
+    <Authors>DeCarabas</Authors>
+    <Version>0.9.1</Version>
     <Description>A .net benchmarking tool accurate to sub-nanosecond time scales</Description>
     <PackageProjectUrl>https://github.com/DeCarabas/readysharp</PackageProjectUrl>
     <IncludeSymbols>true</IncludeSymbols>
