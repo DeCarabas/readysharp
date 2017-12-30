@@ -1,4 +1,4 @@
-namespace ReadyGo
+namespace ReadySharp
 {
     using System.Diagnostics;
 

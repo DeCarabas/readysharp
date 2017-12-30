@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace ReadyGo
+namespace ReadySharp
 {
     sealed class NullBenchmark : BenchmarkBase
     {

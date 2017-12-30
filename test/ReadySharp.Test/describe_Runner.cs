@@ -2,7 +2,7 @@ using System;
 using FluentAssertions;
 using NSpec;
 
-namespace ReadyGo.Test
+namespace ReadySharp.Test
 {
     public class describe_Runner : nspec
     {

@@ -31,7 +31,7 @@ Benchmarks are defined as classes implementing the `IBenchmark` interface:
 
 ```C#
 using System.IO;
-class BigFiles : IBenchmark 
+class BigFiles : ReadySharp.IBenchmark 
 {
     public string Name => "big files";
     public void Setup() => File.WriteAllText("foo", new String('X', 1000000));
@@ -48,7 +48,7 @@ Benchmarks are executed by calling the `Ready.Go` method, usually from the
 `Main` method of a command-line EXE. For example:
 
 ```C#
-using ReadyGo;
+using ReadySharp;
 static class Program
 {
     public static int Main(string[] args) => Ready.Go(args, new BigFiles());

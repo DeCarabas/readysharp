@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace ReadyGo
+namespace ReadySharp
 {
     /// <summary>
     /// Provides command-line configuation options to the benchmark runner.

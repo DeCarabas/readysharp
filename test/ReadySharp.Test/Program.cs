@@ -4,7 +4,7 @@ using NSpec;
 using NSpec.Domain;
 using NSpec.Domain.Formatters;
 
-namespace ReadyGo.Test
+namespace ReadySharp.Test
 {
     public static class Program
     {

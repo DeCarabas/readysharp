@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ReadyGo
+namespace ReadySharp
 {
     /// <summary>
     /// Format benchmark results for display on a terminal.

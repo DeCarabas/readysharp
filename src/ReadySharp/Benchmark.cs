@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace ReadyGo
+namespace ReadySharp
 {
     /// <summary>
     /// The core interface for a benchmark.

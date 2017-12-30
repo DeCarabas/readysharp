@@ -5,13 +5,13 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BED26019-E0EA-48B0-83B5-486E583B1C3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadyGo", "src\ReadyGo\ReadyGo.csproj", "{26CF2F2F-97E5-418F-A12E-299AEA3BE963}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadySharp", "src\ReadySharp\ReadySharp.csproj", "{26CF2F2F-97E5-418F-A12E-299AEA3BE963}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "examples", "examples\examples.csproj", "{9744943A-6B91-4279-B85E-31A271FFC160}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C3D7D008-81A9-409D-9264-C17FDB838178}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadyGo.Test", "test\ReadyGo.Test\ReadyGo.Test.csproj", "{CD1A82D9-A6A2-48AF-85AD-D44BE23CE810}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadySharp.Test", "test\ReadySharp.Test\ReadySharp.Test.csproj", "{CD1A82D9-A6A2-48AF-85AD-D44BE23CE810}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

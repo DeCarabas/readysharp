@@ -1,4 +1,4 @@
-namespace ReadyGo
+namespace ReadySharp
 {
     /// <summary>
     /// Records the amount of time a benchmark takes.
